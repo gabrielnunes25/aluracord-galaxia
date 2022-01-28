@@ -1,34 +1,7 @@
 import { Box, Button, Text, TextField, Image } from '@skynexui/components';
 import appConfig from '../config.json';
-
-function GlobalStyle() {
-    return (
-        <style global jsx>{`
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-                list-style: none;
-            }
-            body {
-                font-family: 'Open Sans', sans-serif;
-            }
-            html,
-            body,
-            #__next {
-                min-height: 100vh;
-                display: flex;
-                flex: 1;
-            }
-            #__next {
-                flex: 1;
-            }
-            #__next > * {
-                flex: 1;
-            }
-        `}</style>
-    );
-}
+import { useState } from 'react';
+import { useRouter } from 'next/router';
 
 function Titulo(props) {
     const Tag = props.tag || 'h1';
@@ -47,19 +20,18 @@ function Titulo(props) {
 }
 
 export default function PaginaInicial() {
-    const username = appConfig.name;
+    const [userName, setuserName] = useState(appConfig.name);
+    const roteamento = useRouter();
 
     return (
         <>
-            <GlobalStyle />
             <Box
                 styleSheet={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    backgroundColor: 'blue',
                     backgroundImage:
-                        'url(https://virtualbackgrounds.site/wp-content/uploads/2020/08/the-matrix-digital-rain.jpg)',
+                        'url(https://s2.glbimg.com/rYRBkQxZVtJ1R6M27XDIujqZnLI=/e.glbimg.com/og/ed/f/original/2019/03/12/pia12348_large.jpg)',
                     backgroundRepeat: 'no-repeat',
                     backgroundSize: 'cover',
                     backgroundBlendMode: 'multiply'
@@ -86,6 +58,10 @@ export default function PaginaInicial() {
                     {/* Formulário */}
                     <Box
                         as="form"
+                        onSubmit={event => {
+                            event.preventDefault();
+                            roteamento.push('/chat');
+                        }}
                         styleSheet={{
                             display: 'flex',
                             flexDirection: 'column',
@@ -120,6 +96,10 @@ export default function PaginaInicial() {
                                     backgroundColor:
                                         appConfig.theme.colors.neutrals[800]
                                 }
+                            }}
+                            value={userName}
+                            onChange={event => {
+                                setuserName(event.target.value);
                             }}
                         />
                         <Button
@@ -161,7 +141,7 @@ export default function PaginaInicial() {
                                 borderRadius: '50%',
                                 marginBottom: '16px'
                             }}
-                            src={`https://github.com/${username}.png`}
+                            src={`https://github.com/${userName}.png`}
                         />
                         <Text
                             variant="body4"
@@ -173,7 +153,7 @@ export default function PaginaInicial() {
                                 borderRadius: '1000px'
                             }}
                         >
-                            {username}
+                            {userName}
                         </Text>
                     </Box>
                     {/* Photo Area */}
