@@ -7,7 +7,17 @@ import { createClient } from '@supabase/supabase-js';
 const SUPABASE_ANON_KEY =
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzM2MzgzOCwiZXhwIjoxOTU4OTM5ODM4fQ.EINRCjv7IO6Ax_qY9g_ClGkUW0y3P_xfxb0ujdi1KxM';
 const SUPABASE_URL = 'https://yosbvaoyoctcressfyql.supabase.co';
+
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+function escutaMensagensEmTempoReal(adicionaMensagem) {
+    return supabaseClient
+        .from('mensagens')
+        .on('INSERT', respostaLive => {
+            adicionaMensagem(respostaLive.new);
+        })
+        .subscribe();
+}
 
 export default function ChatPage() {
     const [mensagem, setMensagem] = React.useState('');
@@ -23,9 +33,7 @@ export default function ChatPage() {
         supabaseClient
             .from('mensagens')
             .insert([mensagem])
-            .then(({ data }) => {
-                setListaDeMensagens([data[0], ...listaDeMensagens]);
-            });
+            .then(() => {});
 
         setMensagem('');
     }
@@ -38,6 +46,17 @@ export default function ChatPage() {
             .then(({ data }) => {
                 setListaDeMensagens(data);
             });
+
+        const sub = escutaMensagensEmTempoReal(novaMensagem => {
+            setListaDeMensagens(valorAtualDaLista => {
+                console.log('valorAtualDaLista:', valorAtualDaLista);
+                return [novaMensagem, ...valorAtualDaLista];
+            });
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
     }, []);
 
     return (
@@ -188,6 +207,7 @@ function MessageList(props) {
                                     marginRight: '8px'
                                 }}
                                 src={`https://github.com/${mensagem.de}.png`}
+                                tranformar
                             />
                             <Text tag="strong">{mensagem.de}</Text>
                             <Text
@@ -198,7 +218,9 @@ function MessageList(props) {
                                 }}
                                 tag="span"
                             >
-                                {new Date().toLocaleDateString()}
+                                {new Date(
+                                    mensagem.created_at
+                                ).toLocaleDateString()}
                             </Text>
                         </Box>
                         {mensagem.texto}
